@@ -55,11 +55,9 @@ Function Invoke-MKVCommand()
         Write-Host "Unable to execute MakeMKV: $_.message"
     }
 
-    #for($i = 0; $i -le 100; $i = ($i + 1) % 100)
     do
     {
         $stdOut = Get-Content "makemkv.out" -Tail 1 | ConvertFrom-Csv -Header "Code", "var1", "var2", "var3"
-        #Write-Host $($stdOut.Code)
 
         if ($stdOut.Code -and $stdOut.Code.Contains(":"))
         {
