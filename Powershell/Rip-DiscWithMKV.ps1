@@ -55,12 +55,13 @@ Function Invoke-MKVCommand()
         Write-Host "Unable to execute MakeMKV: $_.message"
     }
 
-    for($i = 0; $i -le 100; $i = ($i + 1) % 100)
+    #for($i = 0; $i -le 100; $i = ($i + 1) % 100)
+    do
     {
         $stdOut = Get-Content "makemkv.out" -Tail 1 | ConvertFrom-Csv -Header "Code", "var1", "var2", "var3"
         #Write-Host $($stdOut.Code)
 
-        if ($stdOut.Code)
+        if ($stdOut.Code -and $stdOut.Code.Contains(":"))
         {
             $code = ($stdOut.Code -split ":")[0]
             
@@ -76,27 +77,22 @@ Function Invoke-MKVCommand()
                 }
                 "MSG" {
                     $message = $stdOut.var3
-                    Write-Progress -Activity "Running $makeMKVSource..." -PercentComplete $i -CurrentOperation $message -Status "Reading..."
+                    Write-Progress -Activity "Running $makeMKVSource..." -CurrentOperation $message -Status "Reading..."
                 }
                 default {
                     $message = $stdOut.var3
-                    Write-Progress -Activity "Running $makeMKVSource..." -PercentComplete $i -CurrentOperation $message -Status "Processing..."
+                    Write-Progress -Activity "Running $makeMKVSource..." -CurrentOperation $message -Status "Processing..."
                 }
             }
         }
         else 
         {
-            Write-Progress -Activity "Running $makeMKVSource..." -PercentComplete $i -Status "Reading..."
+            Write-Progress -Activity "Running $makeMKVSource..." -Status "Reading..."
         }
         
         Start-Sleep -Seconds 5
 
-        if ($makeMkvProcess.HasExited) 
-        {
-            Write-Progress -Activity "MakeMKV" -Completed
-            break
-        }
-    }
+    } until ($makeMkvProcess.HasExited)
 
     Rename-MKVFiles $OutputPath
 }
